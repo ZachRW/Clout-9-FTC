@@ -16,12 +16,14 @@ class Hardware {
     }
 
     boolean mostlyRed() {
-        return colorSensor.red() > colorSensor.blue()
-                && colorSensor.red() > colorSensor.green();
+        return colorSensor.red() > colorSensor.blue() + colorSensor.green();
     }
 
     boolean mostlyBlue() {
-        return colorSensor.blue() > colorSensor.red()
-                && colorSensor.blue() > colorSensor.green();
+        return colorSensor.blue() > colorSensor.red() + colorSensor.green();
+    }
+
+    String getRGB() {
+        return colorSensor.red() + ", " + colorSensor.green() + ", " + colorSensor.blue();
     }
 }

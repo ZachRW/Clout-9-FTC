@@ -17,6 +17,7 @@ public class ColorSensorTest extends OpMode {
 
     @Override
     public void loop() {
+        telemetry.addData("RGB: ", robot.getRGB());
         if (robot.mostlyRed()) {
             motor.setPower(1);
         } else {
