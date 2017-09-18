@@ -1,10 +1,15 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-@TeleOp(name = "Color Test")
+/**
+ * This opmode will run a motor when the color sensor detects more red than blue and green.
+ * It also outputs the RGB values for debugging.
+ */
+
+@Autonomous(name = "Color Test")
 public class ColorSensorTest extends OpMode {
     private Hardware robot = new Hardware();
     private DcMotor motor;
