@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 
 @Autonomous(name = "Color Test")
 public class ColorSensorTest extends OpMode {
-    private Hardware robot = new Hardware();
+    private final Hardware robot = new Hardware();
     private DcMotor motor;
 
     @Override

@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.hardware.Servo;
  */
 
 @Disabled
-@TeleOp(name = "Grabber")
+@TeleOp
 public class Grabber extends OpMode {
     private Servo grabberServo1;
     private Servo grabberServo2;

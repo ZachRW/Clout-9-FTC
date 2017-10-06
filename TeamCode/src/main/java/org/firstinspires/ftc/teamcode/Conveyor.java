@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp
 public class Conveyor extends OpMode {
-    private Hardware robot = new Hardware();
+    private final Hardware robot = new Hardware();
 
     @Override
     public void init() {
