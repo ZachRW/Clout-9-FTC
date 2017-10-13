@@ -17,19 +17,24 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
  */
 
 public class Hardware {
-    private ColorSensor colorSensor;
-    private DcMotor leftConveyor, rightConveyor;
+//    private ColorSensor colorSensor;
+    private DcMotor leftSlide, rightSlide,
+            leftConveyor, rightConveyor,
+            leftWheel, rightWheel;
 
     private VuforiaTrackable relicTemplate;
 
     void init(HardwareMap hardwareMap) {
-        colorSensor = hardwareMap.colorSensor.get("colorSensor");
-        colorSensor.enableLed(true);
-        leftConveyor = hardwareMap.dcMotor.get("leftConveyor");
-        rightConveyor = hardwareMap.dcMotor.get("rightConveyor");
-        leftConveyor.setDirection(DcMotorSimple.Direction.REVERSE);
+        leftSlide       = hardwareMap.dcMotor.get("leftSlide");
+        rightSlide      = hardwareMap.dcMotor.get("rightSlide");
+        leftConveyor    = hardwareMap.dcMotor.get("leftConveyor");
+        rightConveyor   = hardwareMap.dcMotor.get("rightConveyor");
+        leftWheel  = hardwareMap.dcMotor.get("leftWheel");
+        rightWheel = hardwareMap.dcMotor.get("rightWheel");
+//        colorSensor     = hardwareMap.colorSensor.get("colorSensor");
+//        colorSensor.enableLed(true);
         rightConveyor.setDirection(DcMotorSimple.Direction.REVERSE);
-        setUpVuforia();
+        rightWheel   .setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
     private void setUpVuforia() {
@@ -48,24 +53,37 @@ public class Hardware {
         relicTrackables.activate();
     }
 
+    void setWheelPower(double leftPower, double rightPower) {
+        leftWheel .setPower(leftPower);
+        rightWheel.setPower(rightPower);
+    }
+
+    void setLeftSlidePower(double power) {
+        leftSlide.setPower(power);
+    }
+
+    void setRightSlidePower(double power) {
+        rightSlide.setPower(power);
+    }
+
     RelicRecoveryVuMark getVuMark() {
         return RelicRecoveryVuMark.from(relicTemplate);
     }
 
-    boolean mostlyRed() {
-        return colorSensor.red() > colorSensor.blue() + colorSensor.green();
-    }
+//    boolean mostlyRed() {
+//        return colorSensor.red() > colorSensor.blue() + colorSensor.green();
+//    }
 
-    boolean mostlyBlue() {
-        return colorSensor.blue() > colorSensor.red() + colorSensor.green();
-    }
+//    boolean mostlyBlue() {
+//        return colorSensor.blue() > colorSensor.red() + colorSensor.green();
+//    }
 
-    String getRGB() {
-        return colorSensor.red() + ", " + colorSensor.green() + ", " + colorSensor.blue();
-    }
+//    String getRGB() {
+//        return colorSensor.red() + ", " + colorSensor.green() + ", " + colorSensor.blue();
+//    }
 
-    void setConveyorPower(double power) {
-        leftConveyor.setPower(power);
-        rightConveyor.setPower(power);
+    void setConveyorPower(double leftPower, double rightPower) {
+        leftConveyor.setPower(leftPower);
+        rightConveyor.setPower(rightPower);
     }
 }

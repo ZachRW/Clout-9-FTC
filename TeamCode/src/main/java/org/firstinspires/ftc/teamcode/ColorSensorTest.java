@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
@@ -9,6 +10,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
  * It also outputs the RGB values for debugging.
  */
 
+@Disabled
 @Autonomous(name = "Color Test")
 public class ColorSensorTest extends OpMode {
     private final Hardware robot = new Hardware();
@@ -22,11 +24,11 @@ public class ColorSensorTest extends OpMode {
 
     @Override
     public void loop() {
-        telemetry.addData("RGB: ", robot.getRGB());
-        if (robot.mostlyRed()) {
-            motor.setPower(1);
-        } else {
-            motor.setPower(0);
-        }
+//        telemetry.addData("RGB: ", robot.getRGB());
+//        if (robot.mostlyRed()) {
+//            motor.setPower(1);
+//        } else {
+//            motor.setPower(0);
+//        }
     }
 }
