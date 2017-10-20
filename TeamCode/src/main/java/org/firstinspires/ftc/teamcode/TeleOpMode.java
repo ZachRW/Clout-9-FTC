@@ -15,12 +15,12 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp
 public class TeleOpMode extends OpMode {
-    private Hardware robot = new Hardware();
+    private Hardware jeff = new Hardware();
     private double wheelSpeed = 1;
 
     @Override
     public void init() {
-        robot.init(hardwareMap);
+        jeff.init(hardwareMap);
     }
 
     @Override
@@ -34,24 +34,22 @@ public class TeleOpMode extends OpMode {
         if (gamepad1.dpad_down) {
             wheelSpeed = .5;
         }
-        robot.setWheelPower(-gamepad1.left_stick_y * wheelSpeed,
+        jeff.setWheelPower(-gamepad1.left_stick_y * wheelSpeed,
                 -gamepad1.right_stick_y * wheelSpeed);
-        robot.setConveyorPower(-gamepad2.left_stick_y, -gamepad2.right_stick_y);
+        jeff.setConveyorPower(-gamepad2.left_stick_y, -gamepad2.right_stick_y);
         if (gamepad2.left_trigger > 0) {
-            robot.setLeftSlidePower(1);
+            jeff.setLeftSlidePower(1);
+        } else if (gamepad2.left_bumper) {
+            jeff.setLeftSlidePower(-1);
+        } else {
+            jeff.setLeftSlidePower(0);
         }
         if (gamepad2.right_trigger > 0) {
-            robot.setRightSlidePower(1);
-        }
-        if (gamepad2.left_bumper) {
-            robot.setLeftSlidePower(-1);
+            jeff.setRightSlidePower(1);
+        } else if (gamepad2.right_bumper) {
+            jeff.setRightSlidePower(-1);
         } else {
-            robot.setLeftSlidePower(0);
-        }
-        if (gamepad2.right_bumper) {
-            robot.setRightSlidePower(-1);
-        } else {
-            robot.setRightSlidePower(0);
+            jeff.setRightSlidePower(0);
         }
     }
 }

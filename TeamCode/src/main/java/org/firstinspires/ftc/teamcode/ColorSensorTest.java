@@ -13,19 +13,19 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 @Disabled
 @Autonomous(name = "Color Test")
 public class ColorSensorTest extends OpMode {
-    private final Hardware robot = new Hardware();
+    private final Hardware jeff = new Hardware();
     private DcMotor motor;
 
     @Override
     public void init() {
-        robot.init(hardwareMap);
+        jeff.init(hardwareMap);
         motor = hardwareMap.dcMotor.get("motor");
     }
 
     @Override
     public void loop() {
-//        telemetry.addData("RGB: ", robot.getRGB());
-//        if (robot.mostlyRed()) {
+//        telemetry.addData("RGB: ", jeff.getRGB());
+//        if (jeff.mostlyRed()) {
 //            motor.setPower(1);
 //        } else {
 //            motor.setPower(0);
