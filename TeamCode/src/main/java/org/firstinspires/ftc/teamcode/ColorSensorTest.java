@@ -19,16 +19,17 @@ public class ColorSensorTest extends OpMode {
     @Override
     public void init() {
         jeff.init(hardwareMap);
+        jeff.enableColorSensorLed(true);
         motor = hardwareMap.dcMotor.get("motor");
     }
 
     @Override
     public void loop() {
-//        telemetry.addData("RGB: ", jeff.getRGB());
-//        if (jeff.mostlyRed()) {
-//            motor.setPower(1);
-//        } else {
-//            motor.setPower(0);
-//        }
+        telemetry.addData("RGB: ", jeff.getRGB());
+        if (jeff.mostlyRed()) {
+            motor.setPower(1);
+        } else {
+            motor.setPower(0);
+        }
     }
 }

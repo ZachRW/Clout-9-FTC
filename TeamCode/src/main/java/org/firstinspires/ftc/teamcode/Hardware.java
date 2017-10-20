@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
@@ -17,24 +18,29 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
  */
 
 public class Hardware {
-//    private ColorSensor colorSensor;
+    private ColorSensor colorSensor;
     private DcMotor leftSlide, rightSlide,
             leftConveyor, rightConveyor,
             leftWheel, rightWheel;
+    private Servo grabber, flipper;
+    private boolean grabberDown = false, flipperDown = false;
 
     private VuforiaTrackable relicTemplate;
 
     void init(HardwareMap hardwareMap) {
-        leftSlide       = hardwareMap.dcMotor.get("leftSlide");
-        rightSlide      = hardwareMap.dcMotor.get("rightSlide");
-        leftConveyor    = hardwareMap.dcMotor.get("leftConveyor");
-        rightConveyor   = hardwareMap.dcMotor.get("rightConveyor");
-        leftWheel  = hardwareMap.dcMotor.get("leftWheel");
-        rightWheel = hardwareMap.dcMotor.get("rightWheel");
-//        colorSensor     = hardwareMap.colorSensor.get("colorSensor");
-//        colorSensor.enableLed(true);
+        leftSlide     = hardwareMap.dcMotor.get("leftSlide");
+        rightSlide    = hardwareMap.dcMotor.get("rightSlide");
+        leftConveyor  = hardwareMap.dcMotor.get("leftConveyor");
+        rightConveyor = hardwareMap.dcMotor.get("rightConveyor");
+        leftWheel     = hardwareMap.dcMotor.get("leftWheel");
+        rightWheel    = hardwareMap.dcMotor.get("rightWheel");
+//        grabber       = hardwareMap.servo.get("grabber");
+        flipper       = hardwareMap.servo.get("flipper");
+        colorSensor   = hardwareMap.colorSensor.get("colorSensor");
         rightConveyor.setDirection(DcMotorSimple.Direction.REVERSE);
         rightWheel   .setDirection(DcMotorSimple.Direction.REVERSE);
+//        grabber.setPosition(0);
+        flipper.setPosition(.75);
     }
 
     private void setUpVuforia() {
@@ -58,6 +64,28 @@ public class Hardware {
         rightWheel.setPower(rightPower);
     }
 
+//    void toggleGrabber() {
+//        grabberDown = !grabberDown;
+//        if (grabberDown) {
+//            grabber.setPosition(.5);
+//        } else {
+//            grabber.setPosition(0);
+//        }
+//    }
+
+    void toggleFlipper() {
+        flipperDown = !flipperDown;
+        if (flipperDown) {
+            flipper.setPosition(.75);
+        } else {
+            flipper.setPosition(0);
+        }
+    }
+
+    void enableColorSensorLed(boolean enable) {
+        colorSensor.enableLed(enable);
+    }
+
     void setLeftSlidePower(double power) {
         leftSlide.setPower(power);
     }
@@ -70,17 +98,17 @@ public class Hardware {
         return RelicRecoveryVuMark.from(relicTemplate);
     }
 
-//    boolean mostlyRed() {
-//        return colorSensor.red() > colorSensor.blue() + colorSensor.green();
-//    }
+    boolean mostlyRed() {
+        return colorSensor.red() > colorSensor.blue() + colorSensor.green();
+    }
 
-//    boolean mostlyBlue() {
-//        return colorSensor.blue() > colorSensor.red() + colorSensor.green();
-//    }
+    boolean mostlyBlue() {
+        return colorSensor.blue() > colorSensor.red() + colorSensor.green();
+    }
 
-//    String getRGB() {
-//        return colorSensor.red() + ", " + colorSensor.green() + ", " + colorSensor.blue();
-//    }
+    String getRGB() {
+        return colorSensor.red() + ", " + colorSensor.green() + ", " + colorSensor.blue();
+    }
 
     void setConveyorPower(double leftPower, double rightPower) {
         leftConveyor.setPower(leftPower);
