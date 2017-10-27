@@ -21,7 +21,7 @@ public class Hardware {
     private ColorSensor colorSensor;
     private DcMotor leftSlide, rightSlide,
             leftConveyor, rightConveyor,
-            leftWheel, rightWheel;
+            leftWheel, rightWheel, centerWheel;
     private Servo grabber, flipper;
     private boolean grabberDown = false, flipperDown = false;
 
@@ -34,6 +34,7 @@ public class Hardware {
         rightConveyor = hardwareMap.dcMotor.get("rightConveyor");
         leftWheel     = hardwareMap.dcMotor.get("leftWheel");
         rightWheel    = hardwareMap.dcMotor.get("rightWheel");
+        centerWheel   = hardwareMap.dcMotor.get("centerWheel");
 //        grabber       = hardwareMap.servo.get("grabber");
         flipper       = hardwareMap.servo.get("flipper");
         colorSensor   = hardwareMap.colorSensor.get("colorSensor");
@@ -41,9 +42,10 @@ public class Hardware {
         rightWheel   .setDirection(DcMotorSimple.Direction.REVERSE);
 //        grabber.setPosition(0);
         flipper.setPosition(.75);
+        enableColorSensorLed(false);
     }
 
-    private void setUpVuforia() {
+    void setUpVuforia() {
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
         parameters.vuforiaLicenseKey = "AZLv+a7/////AAAAGdyzndpq4khMnz5IMjSvhiR0XbtOlL7ZfQytGj9s" +
                 "4zFCFoa+IqUA1Cjv4ghfSjfRAlRguu6cVbQVM+0Rxladi3AIKhUjIL6v5ToFrK/fxrWdwAzkQfEPM1S" +
@@ -62,6 +64,25 @@ public class Hardware {
     void setWheelPower(double leftPower, double rightPower) {
         leftWheel .setPower(leftPower);
         rightWheel.setPower(rightPower);
+    }
+
+    void setCenterPower(double power) {
+        centerWheel.setPower(power);
+    }
+
+    void reverseWheels() {
+        rightWheel.setDirection(
+                rightWheel.getDirection() == DcMotorSimple.Direction.FORWARD ?
+                        DcMotorSimple.Direction.REVERSE : DcMotorSimple.Direction.FORWARD);
+        leftWheel.setDirection(
+                leftWheel.getDirection() == DcMotorSimple.Direction.FORWARD ?
+                        DcMotorSimple.Direction.REVERSE : DcMotorSimple.Direction.FORWARD);
+
+    }
+
+    private void toggleDirection(DcMotor motor) {
+        motor.setDirection(motor.getDirection() == DcMotorSimple.Direction.FORWARD ?
+                DcMotorSimple.Direction.REVERSE : DcMotorSimple.Direction.FORWARD);
     }
 
 //    void toggleGrabber() {
