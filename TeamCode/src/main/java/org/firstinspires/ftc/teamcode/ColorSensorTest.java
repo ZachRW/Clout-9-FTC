@@ -1,35 +1,33 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
 
 /**
- * This opmode will run a motor when the color sensor detects more red than blue and green.
- * It also outputs the RGB values for debugging.
+ * This opmode will run the right conveyor belt down when it detects mostly blue and reverse it
+ * when it detects mostly red.
+ * It also output the RGB values for debugging.
  */
 
-@Disabled
-@Autonomous(name = "Color Test")
+@Autonomous
 public class ColorSensorTest extends OpMode {
-    private final Hardware jeff = new Hardware();
-    private DcMotor motor;
+    private Hardware jeff = new Hardware();
 
     @Override
     public void init() {
         jeff.init(hardwareMap);
         jeff.enableColorSensorLed(true);
-        motor = hardwareMap.dcMotor.get("motor");
     }
 
     @Override
     public void loop() {
-        telemetry.addData("RGB: ", jeff.getRGB());
-        if (jeff.mostlyRed()) {
-            motor.setPower(1);
+        if (jeff.mostlyBlue()) {
+            jeff.setConveyorPower(0, 1);
+        } else if (jeff.mostlyRed()) {
+            jeff.setConveyorPower(0, -1);
         } else {
-            motor.setPower(0);
+            jeff.setConveyorPower(0, 0);
         }
+        telemetry.addData("RGB", jeff.getRGB());
     }
 }

@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
@@ -22,8 +23,9 @@ public class Hardware {
     private DcMotor leftSlide, rightSlide,
             leftConveyor, rightConveyor,
             leftWheel, rightWheel, centerWheel;
-    private Servo grabber, flipper;
-    private boolean grabberDown = false, flipperDown = false;
+    private Servo flipper;
+    private boolean flipperDown;
+    private ElapsedTime runtime = new ElapsedTime();
 
     private VuforiaTrackable relicTemplate;
 
@@ -35,12 +37,10 @@ public class Hardware {
         leftWheel     = hardwareMap.dcMotor.get("leftWheel");
         rightWheel    = hardwareMap.dcMotor.get("rightWheel");
         centerWheel   = hardwareMap.dcMotor.get("centerWheel");
-//        grabber       = hardwareMap.servo.get("grabber");
         flipper       = hardwareMap.servo.get("flipper");
         colorSensor   = hardwareMap.colorSensor.get("colorSensor");
         rightConveyor.setDirection(DcMotorSimple.Direction.REVERSE);
         rightWheel   .setDirection(DcMotorSimple.Direction.REVERSE);
-//        grabber.setPosition(0);
         flipper.setPosition(.75);
         enableColorSensorLed(false);
     }
@@ -70,30 +70,6 @@ public class Hardware {
         centerWheel.setPower(power);
     }
 
-    void reverseWheels() {
-        rightWheel.setDirection(
-                rightWheel.getDirection() == DcMotorSimple.Direction.FORWARD ?
-                        DcMotorSimple.Direction.REVERSE : DcMotorSimple.Direction.FORWARD);
-        leftWheel.setDirection(
-                leftWheel.getDirection() == DcMotorSimple.Direction.FORWARD ?
-                        DcMotorSimple.Direction.REVERSE : DcMotorSimple.Direction.FORWARD);
-
-    }
-
-    private void toggleDirection(DcMotor motor) {
-        motor.setDirection(motor.getDirection() == DcMotorSimple.Direction.FORWARD ?
-                DcMotorSimple.Direction.REVERSE : DcMotorSimple.Direction.FORWARD);
-    }
-
-//    void toggleGrabber() {
-//        grabberDown = !grabberDown;
-//        if (grabberDown) {
-//            grabber.setPosition(.5);
-//        } else {
-//            grabber.setPosition(0);
-//        }
-//    }
-
     void toggleFlipper() {
         flipperDown = !flipperDown;
         if (flipperDown) {
@@ -115,6 +91,30 @@ public class Hardware {
         rightSlide.setPower(power);
     }
 
+    void setConveyorPower(double leftPower, double rightPower) {
+        leftConveyor.setPower(leftPower);
+        rightConveyor.setPower(rightPower);
+    }
+
+    void runToPos(double speed, int leftPos, int rightPos, double timeoutS) throws InterruptedException {
+        leftWheel .setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftWheel .setTargetPosition(leftPos);
+        rightWheel.setTargetPosition(rightPos);
+        leftWheel .setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightWheel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        runtime.reset();
+        leftWheel .setPower(speed);
+        rightWheel.setPower(speed);
+        while ((leftWheel.isBusy() || rightWheel.isBusy()) && runtime.seconds() < timeoutS) {
+            Thread.sleep(100);
+        }
+        leftWheel .setPower(0);
+        rightWheel.setPower(0);
+        leftWheel .setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
+
     RelicRecoveryVuMark getVuMark() {
         return RelicRecoveryVuMark.from(relicTemplate);
     }
@@ -129,10 +129,5 @@ public class Hardware {
 
     String getRGB() {
         return colorSensor.red() + ", " + colorSensor.green() + ", " + colorSensor.blue();
-    }
-
-    void setConveyorPower(double leftPower, double rightPower) {
-        leftConveyor.setPower(leftPower);
-        rightConveyor.setPower(rightPower);
     }
 }

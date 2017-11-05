@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
  * speed to 1, .75, and .5 respectively.
  * The directional pad on {@link #gamepad2} controls the speed of the linear slides, setting
  * the speed to 1, .5, and .1.
- * Pressing the 'A' button on {@link #gamepad1} toggles the flipper to move up and down.
+ * Pressing the 'B' button on {@link #gamepad1} toggles the flipper to move up and down.
  * Pressing the 'X' button on {@link #gamepad1} reverses the wheels.
  * The y of {@link #gamepad1}'s sticks control the wheels.
  * The y of {@link #gamepad2}'s sticks control the conveyor belts.
@@ -23,9 +23,7 @@ public class TeleOpMode extends OpMode {
     private Hardware jeff = new Hardware();
     private double wheelSpeed = 1;
     private double slideSpeed = 1;
-    private boolean prevA1 = false;
-    private boolean prevX = false;
-//    private boolean prevA2 = false;
+    private boolean prevB, prevX, reverse;
 
     @Override
     public void init() {
@@ -34,11 +32,20 @@ public class TeleOpMode extends OpMode {
 
     @Override
     public void loop() {
-        jeff.setWheelPower(-gamepad1.left_stick_y * wheelSpeed,
-                -gamepad1.right_stick_y * wheelSpeed);
-        jeff.setCenterPower(-gamepad1.left_trigger * wheelSpeed);
-        if (gamepad1.right_trigger != 0) {
-            jeff.setCenterPower(gamepad1.right_trigger * wheelSpeed);
+        if (reverse) {
+            jeff.setWheelPower(gamepad1.right_stick_y * wheelSpeed,
+                    gamepad1.left_stick_y * wheelSpeed);
+            jeff.setCenterPower(gamepad1.left_trigger * wheelSpeed);
+            if (gamepad1.left_trigger != 0) {
+                jeff.setCenterPower(gamepad1.right_trigger * wheelSpeed);
+            }
+        } else {
+            jeff.setWheelPower(-gamepad1.left_stick_y * wheelSpeed,
+                    -gamepad1.right_stick_y * wheelSpeed);
+            jeff.setCenterPower(-gamepad1.left_trigger * wheelSpeed);
+            if (gamepad1.right_trigger != 0) {
+                jeff.setCenterPower(gamepad1.right_trigger * wheelSpeed);
+            }
         }
         if (gamepad1.dpad_up) {
             wheelSpeed = 1;
@@ -49,11 +56,11 @@ public class TeleOpMode extends OpMode {
         if (gamepad1.dpad_down) {
             wheelSpeed = .5;
         }
-        if (!prevA1 && gamepad1.a) {
+        if (!prevB && gamepad1.b) {
             jeff.toggleFlipper();
         }
         if (!prevX && gamepad1.x) {
-            jeff.reverseWheels();
+            reverse = !reverse;
         }
 
         jeff.setConveyorPower(-gamepad2.left_stick_y, -gamepad2.right_stick_y);
@@ -80,12 +87,8 @@ public class TeleOpMode extends OpMode {
         } else {
             jeff.setRightSlidePower(0);
         }
-//        if (prevA2 && gamepad2.a) {
-//            jeff.toggleGrabber();
-//        }
 
         prevX = gamepad1.x;
-        prevA1 = gamepad1.a;
-//        prevA2 = gamepad2.a;
+        prevB = gamepad1.b;
     }
 }
