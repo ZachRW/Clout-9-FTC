@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
@@ -22,10 +23,11 @@ public class Hardware {
     private ColorSensor colorSensor;
     private DcMotor leftSlide, rightSlide,
             leftConveyor, rightConveyor,
-            leftWheel, rightWheel, centerWheel;
+            leftWheel, rightWheel, centerWheel,
+            clawArm;
     private Servo flipper;
     private boolean flipperDown;
-    private ElapsedTime runtime = new ElapsedTime();
+    private final ElapsedTime runtime = new ElapsedTime();
 
     private VuforiaTrackable relicTemplate;
 
@@ -37,11 +39,26 @@ public class Hardware {
         leftWheel     = hardwareMap.dcMotor.get("leftWheel");
         rightWheel    = hardwareMap.dcMotor.get("rightWheel");
         centerWheel   = hardwareMap.dcMotor.get("centerWheel");
+        clawArm       = hardwareMap.dcMotor.get("clawArm");
         flipper       = hardwareMap.servo.get("flipper");
         colorSensor   = hardwareMap.colorSensor.get("colorSensor");
+
+        leftSlide .setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftWheel .setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        clawArm   .setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftSlide .setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        leftWheel .setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        clawArm   .setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        leftSlide    .setDirection(DcMotorSimple.Direction.REVERSE);
         rightConveyor.setDirection(DcMotorSimple.Direction.REVERSE);
-        rightWheel   .setDirection(DcMotorSimple.Direction.REVERSE);
-        flipper.setPosition(.75);
+        centerWheel  .setDirection(DcMotorSimple.Direction.REVERSE);
+
+        flipper.setPosition(1);
         enableColorSensorLed(false);
     }
 
@@ -70,12 +87,16 @@ public class Hardware {
         centerWheel.setPower(power);
     }
 
+    void setClawArmPower(double power) {
+        clawArm.setPower(power);
+    }
+
     void toggleFlipper() {
-        flipperDown = !flipperDown;
+        flipperDown ^= true;
         if (flipperDown) {
-            flipper.setPosition(.75);
+            flipper.setPosition(.2);
         } else {
-            flipper.setPosition(0);
+            flipper.setPosition(1);
         }
     }
 
@@ -92,7 +113,7 @@ public class Hardware {
     }
 
     void setConveyorPower(double leftPower, double rightPower) {
-        leftConveyor.setPower(leftPower);
+        leftConveyor .setPower(leftPower);
         rightConveyor.setPower(rightPower);
     }
 
@@ -103,16 +124,26 @@ public class Hardware {
         rightWheel.setTargetPosition(rightPos);
         leftWheel .setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightWheel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
         runtime.reset();
         leftWheel .setPower(speed);
         rightWheel.setPower(speed);
+
         while ((leftWheel.isBusy() || rightWheel.isBusy()) && runtime.seconds() < timeoutS) {
             Thread.sleep(100);
         }
+
         leftWheel .setPower(0);
         rightWheel.setPower(0);
         leftWheel .setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
+
+    void encoderTelemetry(Telemetry telemetry) {
+        telemetry.addData("Left Slide Pos",  leftSlide.getCurrentPosition());
+        telemetry.addData("Right Slide Pos", rightSlide.getCurrentPosition());
+        telemetry.addData("Left Wheel Pos",  leftWheel.getCurrentPosition());
+        telemetry.addData("Right Wheel Pos", rightWheel.getCurrentPosition());
     }
 
     RelicRecoveryVuMark getVuMark() {

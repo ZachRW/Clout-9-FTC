@@ -16,11 +16,13 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
  * The y of {@link #gamepad2}'s sticks control the conveyor belts.
  * The triggers of {@link #gamepad1} control the center wheel of the robot for strafing.
  * The triggers and bumpers of {@link #gamepad2} control the linear slides.
+ * The 'Y' and 'A' buttons of {@link #gamepad2} control the claw arm.
  */
 
 @TeleOp
 public class TeleOpMode extends OpMode {
-    private Hardware jeff = new Hardware();
+    private static final double CLAW_ARM_SPEED = .05;
+    private final Hardware jeff = new Hardware();
     private double wheelSpeed = 1;
     private double slideSpeed = 1;
     private boolean prevB, prevX, reverse;
@@ -32,21 +34,16 @@ public class TeleOpMode extends OpMode {
 
     @Override
     public void loop() {
-        if (reverse) {
-            jeff.setWheelPower(gamepad1.right_stick_y * wheelSpeed,
-                    gamepad1.left_stick_y * wheelSpeed);
-            jeff.setCenterPower(gamepad1.left_trigger * wheelSpeed);
-            if (gamepad1.left_trigger != 0) {
-                jeff.setCenterPower(gamepad1.right_trigger * wheelSpeed);
-            }
-        } else {
-            jeff.setWheelPower(-gamepad1.left_stick_y * wheelSpeed,
-                    -gamepad1.right_stick_y * wheelSpeed);
-            jeff.setCenterPower(-gamepad1.left_trigger * wheelSpeed);
-            if (gamepad1.right_trigger != 0) {
-                jeff.setCenterPower(gamepad1.right_trigger * wheelSpeed);
-            }
+        jeff.setWheelPower(
+                (reverse ? gamepad1.right_stick_y : -gamepad1.left_stick_y) * wheelSpeed,
+                (reverse ? gamepad1.left_stick_y : -gamepad1.right_stick_y) * wheelSpeed);
+        jeff.setCenterPower(
+                (reverse ? -gamepad1.right_trigger : -gamepad1.left_trigger) * wheelSpeed);
+        if ((reverse ? gamepad1.left_trigger : gamepad1.right_trigger) != 0) {
+            jeff.setCenterPower(
+                    (reverse ? gamepad1.left_trigger : gamepad1.right_trigger) * wheelSpeed);
         }
+
         if (gamepad1.dpad_up) {
             wheelSpeed = 1;
         }
@@ -64,6 +61,14 @@ public class TeleOpMode extends OpMode {
         }
 
         jeff.setConveyorPower(-gamepad2.left_stick_y, -gamepad2.right_stick_y);
+        if (gamepad2.y) {
+            jeff.setClawArmPower(CLAW_ARM_SPEED);
+        } else if (gamepad2.a) {
+            jeff.setClawArmPower(-CLAW_ARM_SPEED);
+        } else {
+            jeff.setClawArmPower(0);
+        }
+
         if (gamepad2.dpad_up) {
             slideSpeed = 1;
         }
@@ -73,6 +78,7 @@ public class TeleOpMode extends OpMode {
         if (gamepad2.dpad_down) {
             slideSpeed = .1;
         }
+
         if (gamepad2.left_trigger > 0) {
             jeff.setLeftSlidePower(slideSpeed);
         } else if (gamepad2.left_bumper) {
@@ -90,5 +96,7 @@ public class TeleOpMode extends OpMode {
 
         prevX = gamepad1.x;
         prevB = gamepad1.b;
+
+        jeff.encoderTelemetry(telemetry);
     }
 }

@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 @Autonomous
 public class Vuforia extends OpMode {
-    private Hardware jeff = new Hardware();
+    private final Hardware jeff = new Hardware();
 
     @Override
     public void init() {
