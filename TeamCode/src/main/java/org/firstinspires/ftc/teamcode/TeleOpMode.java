@@ -17,15 +17,18 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
  * The triggers of {@link #gamepad1} control the center wheel of the robot for strafing.
  * The triggers and bumpers of {@link #gamepad2} control the linear slides.
  * The 'Y' and 'A' buttons of {@link #gamepad2} control the claw arm.
+ * The 'X' button of {@link #gamepad2} toggles the claw.
  */
 
 @TeleOp
 public class TeleOpMode extends OpMode {
+    private static final int SLIDE_UPPER_BOUND = 10_000;
+    private static final int SLIDE_LOWER_BOUND = 100;
     private static final double CLAW_ARM_SPEED = .05;
     private final Hardware jeff = new Hardware();
     private double wheelSpeed = 1;
     private double slideSpeed = 1;
-    private boolean prevB, prevX, reverse;
+    private boolean prevB, prevX1, prevX2, reverse;
 
     @Override
     public void init() {
@@ -56,7 +59,7 @@ public class TeleOpMode extends OpMode {
         if (!prevB && gamepad1.b) {
             jeff.toggleFlipper();
         }
-        if (!prevX && gamepad1.x) {
+        if (!prevX1 && gamepad1.x) {
             reverse = !reverse;
         }
 
@@ -69,6 +72,10 @@ public class TeleOpMode extends OpMode {
             jeff.setClawArmPower(0);
         }
 
+        if (gamepad2.x && !prevX2) {
+            jeff.toggleClaw();
+        }
+
         if (gamepad2.dpad_up) {
             slideSpeed = 1;
         }
@@ -79,23 +86,25 @@ public class TeleOpMode extends OpMode {
             slideSpeed = .1;
         }
 
-        if (gamepad2.left_trigger > 0) {
+        if (gamepad2.left_trigger > 0 /*&& -jeff.getLeftSlidePos() > SLIDE_LOWER_BOUND*/) {
             jeff.setLeftSlidePower(slideSpeed);
-        } else if (gamepad2.left_bumper) {
+        } else if (gamepad2.left_bumper /*&& -jeff.getLeftSlidePos() < SLIDE_UPPER_BOUND*/) {
             jeff.setLeftSlidePower(-slideSpeed);
         } else {
             jeff.setLeftSlidePower(0);
         }
-        if (gamepad2.right_trigger > 0) {
+        if (gamepad2.right_trigger > 0 /*&& -jeff.getRightSlidePos() > SLIDE_LOWER_BOUND*/) {
             jeff.setRightSlidePower(1);
-        } else if (gamepad2.right_bumper) {
+        } else if (gamepad2.right_bumper /*&& -jeff.getRightSlidePos() < SLIDE_UPPER_BOUND*/) {
             jeff.setRightSlidePower(-1);
         } else {
             jeff.setRightSlidePower(0);
         }
 
-        prevX = gamepad1.x;
-        prevB = gamepad1.b;
+        prevX1 = gamepad1.x;
+        prevX2 = gamepad2.x;
+        prevB  = gamepad1.b;
+
 
         jeff.encoderTelemetry(telemetry);
     }

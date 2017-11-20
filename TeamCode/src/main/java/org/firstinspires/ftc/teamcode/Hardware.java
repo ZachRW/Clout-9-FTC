@@ -25,8 +25,8 @@ public class Hardware {
             leftConveyor, rightConveyor,
             leftWheel, rightWheel, centerWheel,
             clawArm;
-    private Servo flipper;
-    private boolean flipperDown;
+    private Servo flipper, claw;
+    private boolean flipperDown, clawClosed;
     private final ElapsedTime runtime = new ElapsedTime();
 
     private VuforiaTrackable relicTemplate;
@@ -41,6 +41,7 @@ public class Hardware {
         centerWheel   = hardwareMap.dcMotor.get("centerWheel");
         clawArm       = hardwareMap.dcMotor.get("clawArm");
         flipper       = hardwareMap.servo.get("flipper");
+        claw          = hardwareMap.servo.get("claw");
         colorSensor   = hardwareMap.colorSensor.get("colorSensor");
 
         leftSlide .setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -48,17 +49,18 @@ public class Hardware {
         leftWheel .setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         clawArm   .setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        leftSlide .setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rightSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         leftWheel .setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        leftSlide .setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         clawArm   .setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        leftSlide    .setDirection(DcMotorSimple.Direction.REVERSE);
+        rightSlide   .setDirection(DcMotorSimple.Direction.REVERSE);
         rightConveyor.setDirection(DcMotorSimple.Direction.REVERSE);
         centerWheel  .setDirection(DcMotorSimple.Direction.REVERSE);
 
-        flipper.setPosition(1);
+        flipper.setPosition(.9);
+        claw   .setPosition(0);
         enableColorSensorLed(false);
     }
 
@@ -96,7 +98,16 @@ public class Hardware {
         if (flipperDown) {
             flipper.setPosition(.2);
         } else {
-            flipper.setPosition(1);
+            flipper.setPosition(.9);
+        }
+    }
+
+    void toggleClaw() {
+        clawClosed ^= true;
+        if (clawClosed) {
+            claw.setPosition(.4);
+        } else {
+            claw.setPosition(0);
         }
     }
 
@@ -140,14 +151,22 @@ public class Hardware {
     }
 
     void encoderTelemetry(Telemetry telemetry) {
-        telemetry.addData("Left Slide Pos",  leftSlide.getCurrentPosition());
+        telemetry.addData("Left Slide Pos",  leftSlide .getCurrentPosition());
         telemetry.addData("Right Slide Pos", rightSlide.getCurrentPosition());
-        telemetry.addData("Left Wheel Pos",  leftWheel.getCurrentPosition());
+        telemetry.addData("Left Wheel Pos",  leftWheel .getCurrentPosition());
         telemetry.addData("Right Wheel Pos", rightWheel.getCurrentPosition());
     }
 
     RelicRecoveryVuMark getVuMark() {
         return RelicRecoveryVuMark.from(relicTemplate);
+    }
+
+    int getLeftSlidePos() {
+        return leftSlide.getCurrentPosition();
+    }
+
+    int getRightSlidePos() {
+        return rightSlide.getCurrentPosition();
     }
 
     boolean mostlyRed() {
