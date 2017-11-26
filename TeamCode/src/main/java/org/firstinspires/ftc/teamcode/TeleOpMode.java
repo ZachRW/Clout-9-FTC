@@ -28,7 +28,8 @@ public class TeleOpMode extends OpMode {
     private final Hardware jeff = new Hardware();
     private double wheelSpeed = 1;
     private double slideSpeed = 1;
-    private boolean prevB, prevX1, prevX2, reverse;
+    private boolean clawControl = false;
+    private boolean prevB, prevX1, prevX2, prevY2, reverse;
 
     @Override
     public void init() {
@@ -62,16 +63,24 @@ public class TeleOpMode extends OpMode {
         if (!prevX1 && gamepad1.x) {
             reverse = !reverse;
         }
-
-        jeff.setConveyorPower(-gamepad2.left_stick_y, -gamepad2.right_stick_y);
-        if (gamepad2.y) {
-            jeff.setClawArmPower(CLAW_ARM_SPEED);
-        } else if (gamepad2.a) {
-            jeff.setClawArmPower(-CLAW_ARM_SPEED);
-        } else {
-            jeff.setClawArmPower(0);
+        if(gamepad2.y && !prevY2) {
+            clawControl = !clawControl;
         }
+        if(!clawControl) {
+            jeff.setConveyorPower(-gamepad2.left_stick_y, -gamepad2.right_stick_y);
+        }
+        else {
+                jeff.setClawArmPower(0.25*gamepad2.left_stick_y);
 
+            // Old code for the butons moving the clawArm
+            /*if (gamepad2.y) {
+                jeff.setClawArmPower(CLAW_ARM_SPEED);
+            } else if (gamepad2.a) {
+                jeff.setClawArmPower(-CLAW_ARM_SPEED);
+            } else {
+                jeff.setClawArmPower(0);
+            }*/
+        }
         if (gamepad2.x && !prevX2) {
             jeff.toggleClaw();
         }
@@ -104,6 +113,7 @@ public class TeleOpMode extends OpMode {
         prevX1 = gamepad1.x;
         prevX2 = gamepad2.x;
         prevB  = gamepad1.b;
+        prevY2 = gamepad2.y;
 
 
         jeff.encoderTelemetry(telemetry);

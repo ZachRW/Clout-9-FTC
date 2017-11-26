@@ -14,6 +14,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
+import static java.lang.Thread.sleep;
+
 /**
  * Instances of Hardware provide several methods for initializing
  * and controlling the robot.
@@ -96,14 +98,14 @@ public class Hardware {
     void toggleFlipper() {
         flipperDown ^= true;
         if (flipperDown) {
-            flipper.setPosition(.2);
+            flipper.setPosition(.35);
         } else {
             flipper.setPosition(.9);
         }
     }
 
     void toggleClaw() {
-        clawClosed ^= true;
+        clawClosed = !clawClosed;
         if (clawClosed) {
             claw.setPosition(.4);
         } else {
@@ -141,7 +143,7 @@ public class Hardware {
         rightWheel.setPower(speed);
 
         while ((leftWheel.isBusy() || rightWheel.isBusy()) && runtime.seconds() < timeoutS) {
-            Thread.sleep(100);
+            sleep(100);
         }
 
         leftWheel .setPower(0);
@@ -169,6 +171,14 @@ public class Hardware {
         return rightSlide.getCurrentPosition();
     }
 
+    int getClawArmPos() {
+        return clawArm.getCurrentPosition();
+    }
+
+    void freezeClaw() {
+        clawArm.setTargetPosition(getClawArmPos());
+    }
+
     boolean mostlyRed() {
         return colorSensor.red() > colorSensor.blue() + colorSensor.green();
     }
@@ -179,5 +189,30 @@ public class Hardware {
 
     String getRGB() {
         return colorSensor.red() + ", " + colorSensor.green() + ", " + colorSensor.blue();
+    }
+
+
+    // Autonomus methods
+
+    public void shleep(long milliseconds){
+        try {
+            Thread.sleep(milliseconds);
+        }catch(InterruptedException ie)
+        {
+            //nothing
+        }
+
+    }
+    public void moveForward () {
+        rightWheel.setPower(0.5);
+        leftWheel.setPower(0.5);
+    }
+    public void moveBackwards () {
+        rightWheel.setPower(-0.5);
+        leftWheel.setPower(-0.5);
+    }
+    public void stop(){
+        rightWheel.setPower(0);
+        leftWheel.setPower(0);
     }
 }
