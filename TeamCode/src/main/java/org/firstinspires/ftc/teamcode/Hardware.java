@@ -174,7 +174,8 @@ public class Hardware {
         rightSlide.setPower(speed);
 
         while ((leftSlide.isBusy() || rightSlide.isBusy()) && runtime.seconds() < timeoutS) {
-            encoderTelemetry();
+            telemetry.addData("Left Wheel Pos",  leftWheel .getCurrentPosition());
+            telemetry.addData("Right Wheel Pos", rightWheel.getCurrentPosition());
             telemetry.update();
         }
 
