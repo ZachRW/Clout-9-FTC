@@ -15,13 +15,12 @@ public class ColorSensorTest extends OpMode {
 
     @Override
     public void init() {
-        jeff.init(hardwareMap);
-        jeff.enableColorSensorLed(true);
+        jeff.init(hardwareMap, telemetry);
     }
 
     @Override
     public void loop() {
-        if (jeff.mostlyBlue()) {
+        if (jeff.moreBlue()) {
             jeff.setConveyorPower(0, 1);
         } else if (jeff.mostlyRed()) {
             jeff.setConveyorPower(0, -1);

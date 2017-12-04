@@ -24,16 +24,15 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 public class TeleOpMode extends OpMode {
     private static final int SLIDE_UPPER_BOUND = 10_000;
     private static final int SLIDE_LOWER_BOUND = 100;
-    private static final double CLAW_ARM_SPEED = .05;
+    private static final double CLAW_ARM_SPEED = .25;
     private final Hardware jeff = new Hardware();
     private double wheelSpeed = 1;
     private double slideSpeed = 1;
-    private boolean clawControl = false;
-    private boolean prevB, prevX1, prevX2, prevY2, reverse;
+    private boolean prevB1, prevX1, prevX2, prevY2, reverse, clawControl;
 
     @Override
     public void init() {
-        jeff.init(hardwareMap);
+        jeff.init(hardwareMap, telemetry);
     }
 
     @Override
@@ -57,29 +56,19 @@ public class TeleOpMode extends OpMode {
         if (gamepad1.dpad_down) {
             wheelSpeed = .5;
         }
-        if (!prevB && gamepad1.b) {
+        if (!prevB1 && gamepad1.b) {
             jeff.toggleFlipper();
         }
         if (!prevX1 && gamepad1.x) {
             reverse = !reverse;
         }
-        if(gamepad2.y && !prevY2) {
-            clawControl = !clawControl;
+        if (gamepad2.y && !prevY2) {
+            clawControl ^= true;
         }
-        if(!clawControl) {
+        if (!clawControl) {
             jeff.setConveyorPower(-gamepad2.left_stick_y, -gamepad2.right_stick_y);
-        }
-        else {
-                jeff.setClawArmPower(0.25*gamepad2.left_stick_y);
-
-            // Old code for the butons moving the clawArm
-            /*if (gamepad2.y) {
-                jeff.setClawArmPower(CLAW_ARM_SPEED);
-            } else if (gamepad2.a) {
-                jeff.setClawArmPower(-CLAW_ARM_SPEED);
-            } else {
-                jeff.setClawArmPower(0);
-            }*/
+        } else {
+            jeff.setClawArmPower(CLAW_ARM_SPEED * gamepad2.left_stick_y);
         }
         if (gamepad2.x && !prevX2) {
             jeff.toggleClaw();
@@ -112,10 +101,9 @@ public class TeleOpMode extends OpMode {
 
         prevX1 = gamepad1.x;
         prevX2 = gamepad2.x;
-        prevB  = gamepad1.b;
+        prevB1 = gamepad1.b;
         prevY2 = gamepad2.y;
 
-
-        jeff.encoderTelemetry(telemetry);
+        jeff.encoderTelemetry();
     }
 }

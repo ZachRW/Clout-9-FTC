@@ -14,8 +14,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
-import static java.lang.Thread.sleep;
-
 /**
  * Instances of Hardware provide several methods for initializing
  * and controlling the robot.
@@ -29,11 +27,14 @@ public class Hardware {
             clawArm;
     private Servo flipper, claw;
     private boolean flipperDown, clawClosed;
+    private Telemetry telemetry;
     private final ElapsedTime runtime = new ElapsedTime();
 
     private VuforiaTrackable relicTemplate;
 
-    void init(HardwareMap hardwareMap) {
+    void init(HardwareMap hardwareMap, Telemetry telemetry) {
+        this.telemetry = telemetry;
+
         leftSlide     = hardwareMap.dcMotor.get("leftSlide");
         rightSlide    = hardwareMap.dcMotor.get("rightSlide");
         leftConveyor  = hardwareMap.dcMotor.get("leftConveyor");
@@ -51,19 +52,26 @@ public class Hardware {
         leftWheel .setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         clawArm   .setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        leftWheel .setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        leftWheel .setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         leftSlide .setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         clawArm   .setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        rightSlide   .setDirection(DcMotorSimple.Direction.REVERSE);
+        leftSlide    .setDirection(DcMotorSimple.Direction.REVERSE);
         rightConveyor.setDirection(DcMotorSimple.Direction.REVERSE);
+        rightWheel   .setDirection(DcMotorSimple.Direction.REVERSE);
         centerWheel  .setDirection(DcMotorSimple.Direction.REVERSE);
+
+        leftWheel .setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        rightWheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        leftSlide .setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightSlide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        clawArm   .setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         flipper.setPosition(.9);
         claw   .setPosition(0);
-        enableColorSensorLed(false);
+        telemetry.addLine("Initialized");
     }
 
     void setUpVuforia() {
@@ -113,10 +121,6 @@ public class Hardware {
         }
     }
 
-    void enableColorSensorLed(boolean enable) {
-        colorSensor.enableLed(enable);
-    }
-
     void setLeftSlidePower(double power) {
         leftSlide.setPower(power);
     }
@@ -137,82 +141,58 @@ public class Hardware {
         rightWheel.setTargetPosition(rightPos);
         leftWheel .setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightWheel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        leftWheel .setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightWheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         runtime.reset();
         leftWheel .setPower(speed);
         rightWheel.setPower(speed);
 
         while ((leftWheel.isBusy() || rightWheel.isBusy()) && runtime.seconds() < timeoutS) {
-            sleep(100);
+            telemetry.addData("Left Wheel Pos",  leftWheel .getCurrentPosition());
+            telemetry.addData("Right Wheel Pos", rightWheel.getCurrentPosition());
+            telemetry.update();
         }
 
         leftWheel .setPower(0);
         rightWheel.setPower(0);
-        leftWheel .setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rightWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        Thread.sleep(500);
+        leftWheel .setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftWheel .setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        rightWheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
     }
 
-    void encoderTelemetry(Telemetry telemetry) {
-        telemetry.addData("Left Slide Pos",  leftSlide .getCurrentPosition());
-        telemetry.addData("Right Slide Pos", rightSlide.getCurrentPosition());
-        telemetry.addData("Left Wheel Pos",  leftWheel .getCurrentPosition());
-        telemetry.addData("Right Wheel Pos", rightWheel.getCurrentPosition());
+    void slideRunToPos(double speed, int leftPos, int rightPos, double timeoutS) {
+        leftSlide .setTargetPosition(leftPos);
+        rightSlide.setTargetPosition(rightPos);
+        leftSlide .setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        runtime.reset();
+        leftSlide .setPower(speed);
+        rightSlide.setPower(speed);
+
+        while ((leftSlide.isBusy() || rightSlide.isBusy()) && runtime.seconds() < timeoutS) {
+            encoderTelemetry();
+            telemetry.update();
+        }
+
+        leftSlide .setPower(0);
+        rightSlide.setPower(0);
+        leftSlide .setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     RelicRecoveryVuMark getVuMark() {
         return RelicRecoveryVuMark.from(relicTemplate);
     }
 
-    int getLeftSlidePos() {
-        return leftSlide.getCurrentPosition();
-    }
-
-    int getRightSlidePos() {
-        return rightSlide.getCurrentPosition();
-    }
-
-    int getClawArmPos() {
-        return clawArm.getCurrentPosition();
-    }
-
-    void freezeClaw() {
-        clawArm.setTargetPosition(getClawArmPos());
-    }
-
-    boolean mostlyRed() {
-        return colorSensor.red() > colorSensor.blue() + colorSensor.green();
-    }
-
-    boolean mostlyBlue() {
-        return colorSensor.blue() > colorSensor.red() + colorSensor.green();
+    boolean moreBlue() {
+        return colorSensor.blue() > colorSensor.red();
     }
 
     String getRGB() {
         return colorSensor.red() + ", " + colorSensor.green() + ", " + colorSensor.blue();
-    }
-
-
-    // Autonomus methods
-
-    public void shleep(long milliseconds){
-        try {
-            Thread.sleep(milliseconds);
-        }catch(InterruptedException ie)
-        {
-            //nothing
-        }
-
-    }
-    public void moveForward () {
-        rightWheel.setPower(0.5);
-        leftWheel.setPower(0.5);
-    }
-    public void moveBackwards () {
-        rightWheel.setPower(-0.5);
-        leftWheel.setPower(-0.5);
-    }
-    public void stop(){
-        rightWheel.setPower(0);
-        leftWheel.setPower(0);
     }
 }
