@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
  */
 
 @Autonomous
-public class BlueLeft extends LinearOpMode {
+public class JewelBlue extends LinearOpMode {
     private final Hardware jeff = new Hardware();
 
     @Override
@@ -31,11 +31,5 @@ public class BlueLeft extends LinearOpMode {
         }
         jeff.setJewelSweeperPosition(.45);
         sleep(1_000);
-        if (blue) {
-            jeff.runToPos(.1, -200, 200, 2);
-        } else {
-            jeff.runToPos(.1, 200, -200, 2);
-        }
-        jeff.runToPos(.5, -1000, -1000, 5);
     }
 }

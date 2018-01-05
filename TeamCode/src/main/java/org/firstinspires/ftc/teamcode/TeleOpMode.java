@@ -22,8 +22,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp
 public class TeleOpMode extends OpMode {
-    private static final int SLIDE_UPPER_BOUND = 10_000;
-    private static final int SLIDE_LOWER_BOUND = 100;
     private static final double CLAW_ARM_SPEED = .25;
     private final Hardware jeff = new Hardware();
     private double wheelSpeed = 1;
@@ -32,7 +30,13 @@ public class TeleOpMode extends OpMode {
 
     @Override
     public void init() {
-        jeff.init(hardwareMap, telemetry);
+        jeff.setTelemetry(telemetry);
+        jeff.init(hardwareMap);
+    }
+
+    @Override
+    public void start() {
+        jeff.setServoPositions();
     }
 
     @Override
@@ -84,26 +88,28 @@ public class TeleOpMode extends OpMode {
             slideSpeed = .1;
         }
 
-        if (gamepad2.left_trigger > 0 /*&& -jeff.getLeftSlidePos() > SLIDE_LOWER_BOUND*/) {
+        if (gamepad2.left_trigger > 0) {
             jeff.setLeftSlidePower(slideSpeed);
-        } else if (gamepad2.left_bumper /*&& -jeff.getLeftSlidePos() < SLIDE_UPPER_BOUND*/) {
+        } else if (gamepad2.left_bumper) {
             jeff.setLeftSlidePower(-slideSpeed);
         } else {
             jeff.setLeftSlidePower(0);
         }
-        if (gamepad2.right_trigger > 0 /*&& -jeff.getRightSlidePos() > SLIDE_LOWER_BOUND*/) {
+        if (gamepad2.right_trigger > 0) {
             jeff.setRightSlidePower(1);
-        } else if (gamepad2.right_bumper /*&& -jeff.getRightSlidePos() < SLIDE_UPPER_BOUND*/) {
+        } else if (gamepad2.right_bumper) {
             jeff.setRightSlidePower(-1);
         } else {
             jeff.setRightSlidePower(0);
+        }
+
+        if (gamepad2.a) {
+            jeff.setJewelSweeperPosition(.45);
         }
 
         prevX1 = gamepad1.x;
         prevX2 = gamepad2.x;
         prevB1 = gamepad1.b;
         prevY2 = gamepad2.y;
-
-        jeff.encoderTelemetry();
     }
 }

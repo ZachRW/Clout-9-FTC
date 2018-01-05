@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
  */
 
 @Autonomous
-public class BlueLeft extends LinearOpMode {
+public class BlueRight extends LinearOpMode {
     private final Hardware jeff = new Hardware();
 
     @Override

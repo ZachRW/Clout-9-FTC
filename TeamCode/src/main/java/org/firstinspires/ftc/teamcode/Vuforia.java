@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 /**
@@ -8,13 +9,15 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
  * It uses telemetry to output the type of pictograph or "UNKNOWN" if it can't identify one.
  */
 
+@Disabled
 @Autonomous
 public class Vuforia extends OpMode {
     private final Hardware jeff = new Hardware();
 
     @Override
     public void init() {
-        jeff.setUpVuforia();
+        jeff.setTelemetry(telemetry);
+        jeff.initVuforia();
     }
 
     @Override

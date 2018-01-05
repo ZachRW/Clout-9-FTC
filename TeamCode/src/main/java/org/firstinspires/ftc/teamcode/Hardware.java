@@ -25,16 +25,18 @@ public class Hardware {
             leftConveyor, rightConveyor,
             leftWheel, rightWheel, centerWheel,
             clawArm;
-    private Servo flipper, claw;
+    private Servo flipper, claw, jewelSweeper;
     private boolean flipperDown, clawClosed;
     private Telemetry telemetry;
     private final ElapsedTime runtime = new ElapsedTime();
 
     private VuforiaTrackable relicTemplate;
 
-    void init(HardwareMap hardwareMap, Telemetry telemetry) {
+    void setTelemetry(Telemetry telemetry) {
         this.telemetry = telemetry;
+    }
 
+    void init(HardwareMap hardwareMap) {
         leftSlide     = hardwareMap.dcMotor.get("leftSlide");
         rightSlide    = hardwareMap.dcMotor.get("rightSlide");
         leftConveyor  = hardwareMap.dcMotor.get("leftConveyor");
@@ -45,6 +47,7 @@ public class Hardware {
         clawArm       = hardwareMap.dcMotor.get("clawArm");
         flipper       = hardwareMap.servo.get("flipper");
         claw          = hardwareMap.servo.get("claw");
+        jewelSweeper  = hardwareMap.servo.get("jewelSweeper");
         colorSensor   = hardwareMap.colorSensor.get("colorSensor");
 
         leftSlide .setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -63,18 +66,24 @@ public class Hardware {
         rightWheel   .setDirection(DcMotorSimple.Direction.REVERSE);
         centerWheel  .setDirection(DcMotorSimple.Direction.REVERSE);
 
-        leftWheel .setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        rightWheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        wheelBrake(false);
         leftSlide .setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightSlide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         clawArm   .setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        flipper.setPosition(.9);
-        claw   .setPosition(0);
-        telemetry.addLine("Initialized");
+        telemetry.addLine("Initialized Hardware");
+        telemetry.update();
     }
 
-    void setUpVuforia() {
+    void setServoPositions() {
+        flipper     .setPosition(.9);
+        claw        .setPosition(0);
+        jewelSweeper.setPosition(.45);
+    }
+
+    void initVuforia() {
+        telemetry.addLine("Initializing Vuforia");
+        telemetry.update();
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
         parameters.vuforiaLicenseKey = "AZLv+a7/////AAAAGdyzndpq4khMnz5IMjSvhiR0XbtOlL7ZfQytGj9s" +
                 "4zFCFoa+IqUA1Cjv4ghfSjfRAlRguu6cVbQVM+0Rxladi3AIKhUjIL6v5ToFrK/fxrWdwAzkQfEPM1S" +
@@ -82,12 +91,14 @@ public class Hardware {
                 "cuI9JyHU3/JLGSBhoIm04G3UnrjVrjKfPFlX9NOwWQLOYjQ+4B1l4M8u9BdihYgmfMST0BHON+MQ7qC" +
                 "5dMs/2OSZlSKSZISN/L+x606xzc2Sv5G+ULUpaUiChG7Zlv/rncu337WhZjJ1X2pQGY7gIBcSH+TUw8" +
                 "1n2jYKkm";
-        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT;
+        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
         VuforiaLocalizer vuforiaLocalizer = ClassFactory.createVuforiaLocalizer(parameters);
         VuforiaTrackables relicTrackables = vuforiaLocalizer.loadTrackablesFromAsset("RelicVuMark");
         relicTemplate = relicTrackables.get(0);
         relicTemplate.setName("relicVuMarkTemplate");
         relicTrackables.activate();
+        telemetry.addLine("Initialized Vuforia");
+        telemetry.update();
     }
 
     void setWheelPower(double leftPower, double rightPower) {
@@ -106,7 +117,7 @@ public class Hardware {
     void toggleFlipper() {
         flipperDown ^= true;
         if (flipperDown) {
-            flipper.setPosition(.35);
+            flipper.setPosition(.25);
         } else {
             flipper.setPosition(.9);
         }
@@ -134,6 +145,16 @@ public class Hardware {
         rightConveyor.setPower(rightPower);
     }
 
+    void wheelBrake(boolean brake) {
+        if (brake) {
+            leftWheel .setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            rightWheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        } else {
+            leftWheel .setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            rightWheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        }
+    }
+
     void runToPos(double speed, int leftPos, int rightPos, double timeoutS) throws InterruptedException {
         leftWheel .setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightWheel.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -141,8 +162,6 @@ public class Hardware {
         rightWheel.setTargetPosition(rightPos);
         leftWheel .setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightWheel.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        leftWheel .setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightWheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         runtime.reset();
         leftWheel .setPower(speed);
@@ -159,30 +178,11 @@ public class Hardware {
         Thread.sleep(500);
         leftWheel .setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        leftWheel .setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        rightWheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
     }
 
-    void slideRunToPos(double speed, int leftPos, int rightPos, double timeoutS) {
-        leftSlide .setTargetPosition(leftPos);
-        rightSlide.setTargetPosition(rightPos);
-        leftSlide .setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        runtime.reset();
-        leftSlide .setPower(speed);
-        rightSlide.setPower(speed);
-
-        while ((leftSlide.isBusy() || rightSlide.isBusy()) && runtime.seconds() < timeoutS) {
-            telemetry.addData("Left Wheel Pos",  leftWheel .getCurrentPosition());
-            telemetry.addData("Right Wheel Pos", rightWheel.getCurrentPosition());
-            telemetry.update();
-        }
-
-        leftSlide .setPower(0);
-        rightSlide.setPower(0);
-        leftSlide .setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    void setJewelSweeperPosition(double position) {
+        jewelSweeper.setPosition(position);
     }
 
     RelicRecoveryVuMark getVuMark() {
